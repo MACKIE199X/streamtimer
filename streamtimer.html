@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Triple Timer Overlay</title>
+
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    height: 100vh;
+    font-family: Impact, Arial, sans-serif;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  .timer {
+    position: fixed;
+    font-size: 100px;
+    text-shadow: 0 0 15px rgba(255,0,0,0.8);
+    width: 100%;
+    text-align: center;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #timeA { top: 20%; }
+  #timeB { top: 50%; transform: translate(-50%, -50%); }
+  #timeC { top: 80%; }
+</style>
+</head>
+<body>
+
+<div id="timeA" class="timer">00:00:00</div>
+<div id="timeB" class="timer">00:00:00</div>
+<div id="timeC" class="timer">00:00:00</div>
+
+<script>
+let worker = new Worker("worker.js");
+
+worker.onmessage = function(e){
+  let data = e.data;
+  document.getElementById("timeA").textContent = data.A;
+  document.getElementById("timeB").textContent = data.B;
+  document.getElementById("timeC").textContent = data.C;
+};
+
+// NUMPAD CONTROLS
+document.addEventListener("keydown",(e)=>{
+  switch(e.code){
+    case "Numpad7": worker.postMessage({cmd:"toggle", id:"A"}); break;
+    case "Numpad8": worker.postMessage({cmd:"stop", id:"A"}); break;
+    case "Numpad9": worker.postMessage({cmd:"add", id:"A", sec:1800}); break;
+
+    case "Numpad4": worker.postMessage({cmd:"toggle", id:"B"}); break;
+    case "Numpad5": worker.postMessage({cmd:"stop", id:"B"}); break;
+    case "Numpad6": worker.postMessage({cmd:"add", id:"B", sec:1800}); break;
+
+    case "Numpad1": worker.postMessage({cmd:"toggle", id:"C"}); break;
+    case "Numpad2": worker.postMessage({cmd:"stop", id:"C"}); break;
+    case "Numpad3": worker.postMessage({cmd:"add", id:"C", sec:1800}); break;
+  }
+});
+
+// Save on close
+window.addEventListener("beforeunload", ()=>{
+  worker.postMessage({cmd:"save"});
+});
+</script>
+
+</body>
+</html>
